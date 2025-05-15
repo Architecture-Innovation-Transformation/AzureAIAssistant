@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure AI Assistant ✨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <style>
+        body {
+            background-color: #fdf6f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            color: #444;
+        }
+        
+        .markdown-content {
+            line-height: 1.6;
+        }
+        
+        .markdown-content h1, 
+        .markdown-content h2, 
+        .markdown-content h3 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        
+        .markdown-content p {
+            margin-bottom: 1em;
+        }
+        
+        .markdown-content ul, 
+        .markdown-content ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        
+        .markdown-content code {
+            font-family: monospace;
+            padding: 0.2em 0.4em;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+        
+        .markdown-content pre {
+            background-color: #f6f8fa;
+            border-radius: 5px;
+            padding: 1em;
+            overflow-x: auto;
+            margin-bottom: 1em;
+        }
+        
+        .markdown-content pre code {
+            padding: 0;
+            background-color: transparent;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 3px solid #ddd;
+            padding-left: 1em;
+            color: #666;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        
+        .markdown-content th, 
+        .markdown-content td {
+            padding: 0.5em;
+            border: 1px solid #ddd;
+        }
+        
+        .markdown-content img {
+            max-width: 100%;
+        }
+        
+        h1 {
+            color: #ff69b4;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        
+        .chat-container {
+            width: 90%;
+            max-width: 700px;
+            height: 60vh;
+            border: 2px solid #ffd1dc;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #fffafc;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #fff0f5;
+            border-top: 1px solid #ffd1dc;
+        }
+        
+        textarea {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #ffd1dc;
+            border-radius: 10px;
+            outline: none;
+            background-color: #ffffff;
+            min-width: 0;
+            resize: none;
+            font-family: inherit;
+            height: 40px;
+        }
+        
+        button {
+            background-color: #ffb6c1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background-color: #ff8fa3;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .user-message {
+            background-color: #ffb6c1;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .assistant-message {
+            background-color: #e6e6e6;
+            color: #444;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .thinking {
+            font-style: italic;
+            align-self: center;
+            color: #888;
+            margin: 10px 0;
+        }
+        
+        .session-info {
+            font-size: 0.8em;
+            margin-top: 10px;
+            color: #888;
+        }
+        
+        .button-controls {
+            margin-bottom: 15px;
+            width: 90%;
+            max-width: 700px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .action-button {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .action-button:hover {
+            background-color: #ff4da6;
+            transform: translateY(-2px);
+        }
+        
+        .login-container {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+            background-color: #fffafc;
+            border-radius: 15px;
+            border: 2px solid #ffd1dc;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+        }
+        
+        .login-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: white;
+            color: #444;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-weight: 500;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .login-button img {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .login-button:hover {
+            background-color: #f8f8f8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .admin-panel {
+            width: 90%;
+            max-width: 700px;
+            margin-top: 20px;
+            border: 2px solid #ffd1dc;
+            border-radius: 15px;
+            background-color: #fffafc;
+            overflow: hidden;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #ffb6c1;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .admin-content {
+            padding: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .admin-search {
+            margin-bottom: 15px;
+        }
+        
+        .admin-search-input {
+            width: 70%;
+            padding: 8px;
+            border: 2px solid #ffd1dc;
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        .admin-search-btn {
+            background-color: #ffb6c1;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .search-result-item {
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ffd1dc;
+        }
+        
+        .search-result-score {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .search-result-content {
+            color: #444;
+        }
+        
+        .search-stats {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .processed-query {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .button-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .user-profile {
+                order: -1;
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+            
+            .action-button {
+                width: 100%;
+            }
+            
+            .chat-input {
+                flex-direction: column;
+            }
+            
+            textarea {
+                margin-bottom: 10px;
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            button#send-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .admin-search {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .admin-search-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .admin-search-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Azure AI Assistant ✨</h1>
+    
+    <div id="login-container" class="login-container">
+        <h2>Please sign in to continue</h2>
+        <p>Sign in with your account to use the AI Assistant.</p>
+        <a href="/api/auth/login" class="login-button">
+            <img src="/images/Logo.svg" alt="Google Logo">
+            Sign in with Google
+        </a>
+    </div>
+    
+    <div id="main-container" class="hidden">
+        <div class="button-controls">
+            <button id="clear-chat-btn" class="action-button">Clear Chat</button>
+            <div id="user-profile" class="user-profile">
+                <img id="user-avatar" class="user-avatar" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="User avatar">
+                <span id="user-name"></span>
+                <span id="admin-badge" class="hidden" style="background-color: #ffb6c1; color: white; font-size: 0.8em; padding: 2px 6px; border-radius: 10px; margin-left: 5px;">Admin</span>
+            </div>
+            <button id="logout-btn" class="action-button">Logout</button>
+        </div>
+        
+        <div class="chat-container">
+            <div id="chat-messages" class="chat-messages">
+            </div>
+            <div class="chat-input">
+                <textarea id="user-input" placeholder="Type your message here..." rows="1"></textarea>
+                <button id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="admin-panel" class="admin-panel hidden">
+            <div class="admin-header">
+                <span>Admin Panel</span>
+            </div>
+            <div class="admin-content">
+                <div id="search-tab" class="tab-content">
+                    <h3 style="color: #ff69b4;">Search Azure Directly</h3>
+                    <div class="admin-search">
+                        <input id="admin-search-input" class="admin-search-input" type="text" placeholder="Search content from Azure...">
+                        <button id="admin-search-btn" class="admin-search-btn">Search</button>
+                    </div>
+                    <div id="admin-search-results" class="admin-search-results">
+                        <div class="processed-query" id="processed-query"></div>
+                        <div class="search-stats" id="search-stats"></div>
+                        <div id="search-results-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="session-info">
+            Session ID: <span id="session-id"></span>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            user: null,
+            sessionId: null,
+            messages: []
+        };
+
+        const elements = {
+            loginContainer: document.getElementById('login-container'),
+            mainContainer: document.getElementById('main-container'),
+            userProfile: document.getElementById('user-profile'),
+            userAvatar: document.getElementById('user-avatar'),
+            userName: document.getElementById('user-name'),
+            adminBadge: document.getElementById('admin-badge'),
+            chatMessages: document.getElementById('chat-messages'),
+            userInput: document.getElementById('user-input'),
+            sendBtn: document.getElementById('send-btn'),
+            clearChatBtn: document.getElementById('clear-chat-btn'),
+            logoutBtn: document.getElementById('logout-btn'),
+            sessionId: document.getElementById('session-id'),
+            adminPanel: document.getElementById('admin-panel'),
+            adminSearchInput: document.getElementById('admin-search-input'),
+            adminSearchBtn: document.getElementById('admin-search-btn'),
+            processedQuery: document.getElementById('processed-query'),
+            searchStats: document.getElementById('search-stats'),
+            searchResultsContainer: document.getElementById('search-results-container')
+        };
+
+        window.addEventListener('DOMContentLoaded', init);
+
+        elements.sendBtn.addEventListener('click', handleSendMessage);
+        elements.userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+        elements.clearChatBtn.addEventListener('click', handleClearChat);
+        elements.logoutBtn.addEventListener('click', handleLogout);
+        elements.adminSearchBtn.addEventListener('click', handleAdminSearch);
+
+        async function init() {
+            await checkAuthStatus();
+            if (state.user && state.user.isAuthenticated) {
+                state.sessionId = generateSessionId();
+                elements.sessionId.textContent = state.sessionId;
+                await loadChatHistory();
+                renderChatMessages();
+                
+                if (state.user.role === 'admin') {
+                    loadAdminPanel();
+                }
+            }
+        }
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/user');
+                state.user = await response.json();
+                updateUIBasedOnAuth();
+            } catch (error) {
+                console.error('Error checking auth status', error);
+            }
+        }
+
+        function updateUIBasedOnAuth() {
+            if (state.user && state.user.isAuthenticated) {
+                elements.loginContainer.classList.add('hidden');
+                elements.mainContainer.classList.remove('hidden');
+                elements.userAvatar.src = state.user.picture || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                elements.userName.textContent = state.user.name;
+                
+                if (state.user.role === 'admin') {
+                    elements.adminBadge.classList.remove('hidden');
+                    elements.adminPanel.classList.remove('hidden');
+                } else {
+                    elements.adminBadge.classList.add('hidden');
+                    elements.adminPanel.classList.add('hidden');
+                }
+            } else {
+                elements.loginContainer.classList.remove('hidden');
+                elements.mainContainer.classList.add('hidden');
+            }
+        }
+
+        function handleLogout() {
+            window.location.href = '/api/auth/logout';
+        }
+
+        function generateSessionId() {
+            return `session_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`;
+        }
+
+        async function loadChatHistory() {
+            try {
+                const response = await fetch(`/api/ai/history/${state.sessionId}`);
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    state.messages = data.map(message => ({
+                        role: message.role,
+                        content: message.content,
+                        isLoading: false
+                    }));
+                } else {
+                    addMessage('assistant', 'Hello! How can I assist you today?');
+                }
+            } catch (error) {
+                console.error('Error loading chat history', error);
+                addMessage('assistant', 'Hello! How can I assist you today?');
+            }
+        }
+
+        function addMessage(role, content, isLoading = false) {
+            state.messages.push({
+                role,
+                content,
+                isLoading
+            });
+        }
+
+        function renderChatMessages() {
+            elements.chatMessages.innerHTML = '';
+            
+            if (state.messages.length === 0) {
+                elements.chatMessages.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Start a conversation with the AI Assistant.</p></div>';
+                return;
+            }
+            
+            state.messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.role}-message`;
+                
+                if (message.isLoading) {
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'thinking';
+                    loadingDiv.textContent = 'AI is thinking...';
+                    messageDiv.appendChild(loadingDiv);
+                } else {
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'markdown-content';
+                    
+                    if (message.role === 'assistant') {
+                        contentDiv.innerHTML = marked.parse(message.content);
+                        setTimeout(() => {
+                            messageDiv.querySelectorAll('pre code').forEach(block => {
+                                hljs.highlightElement(block);
+                            });
+                        }, 0);
+                    } else {
+                        contentDiv.textContent = message.content;
+                    }
+                    
+                    messageDiv.appendChild(contentDiv);
+                }
+                
+                elements.chatMessages.appendChild(messageDiv);
+            });
+            
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        async function handleSendMessage() {
+            const message = elements.userInput.value.trim();
+            if (!message) return;
+            
+            elements.userInput.value = '';
+            
+            addMessage('user', message);
+            renderChatMessages();
+            
+            addMessage('assistant', '...', true);
+            renderChatMessages();
+            
+            try {
+                const response = await fetch('/api/ai/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userQuestion: message,
+                        sessionId: state.sessionId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                state.messages.pop();
+                
+                if (data.answer) {
+                    addMessage('assistant', data.answer);
+                    renderChatMessages();
+                }
+            } catch (error) {
+                console.error('Error sending message', error);
+                state.messages.pop();
+                addMessage('assistant', 'Sorry, there was an error processing your request.');
+                renderChatMessages();
+            }
+        }
+
+        async function handleClearChat() {
+            if (!confirm('Are you sure you want to clear the chat?')) return;
+            
+            try {
+                await fetch(`/api/ai/clear-history/${state.sessionId}`, {
+                    method: 'POST'
+                });
+                
+                state.messages = [];
+                addMessage('assistant', 'Hello! How can I assist you today?');
+                renderChatMessages();
+            } catch (error) {
+                console.error('Error clearing chat', error);
+            }
+        }
+
+        async function handleAdminSearch() {
+            const query = elements.adminSearchInput.value.trim();
+            if (!query) return;
+            
+            elements.searchResultsContainer.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+            
+            try {
+                const response = await fetch('/api/ai/admin/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query
+                    })
+                });
+                
+                const data = await response.json();
+                
+                elements.processedQuery.textContent = `Processed query: ${data.processedQuery}`;
+                elements.searchStats.textContent = `Found ${data.totalCount} results`;
+                
+                renderSearchResults(data.results);
+            } catch (error) {
+                console.error('Error performing admin search', error);
+                elements.searchResultsContainer.innerHTML = '<div style="color: #ff4da6;">An error occurred while searching.</div>';
+            }
+        }
+
+        function renderSearchResults(results) {
+            elements.searchResultsContainer.innerHTML = '';
+            
+            if (!results || results.length === 0) {
+                elements.searchResultsContainer.innerHTML = '<div style="text-align: center; padding: 20px;">No results found.</div>';
+                return;
+            }
+            
+            results.forEach(result => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'search-result-item';
+                
+                const scoreElement = document.createElement('div');
+                scoreElement.className = 'search-result-score';
+                scoreElement.textContent = `Score: ${result.score.toFixed(2)}`;
+                
+                const contentElement = document.createElement('div');
+                contentElement.className = 'search-result-content';
+                contentElement.textContent = result.content;
+                
+                resultElement.appendChild(scoreElement);
+                resultElement.appendChild(contentElement);
+                
+                elements.searchResultsContainer.appendChild(resultElement);
+            });
+        }
+
+        async function loadAdminPanel() {
+        }
+    </script>
+</body>
+</html>
